@@ -29,13 +29,15 @@
       function isWeChat(ua) { return /MicroMessenger/i.test(ua); }
       function isQQ(ua) { return /(\bQQ\/|QQBrowser|MQQBrowser)/i.test(ua); }
 
-      // 目标地址拼接：把当前访问的路径/查询/hash 保留到目标域
+      // 目标地址拼接：仅保留当前访问的查询参数与 hash，不附加路径
       function buildTargetUrl(currentUrl) {
         try {
-          const base = new URL(TARGET_URL);
           const src = new URL(currentUrl);
-          // 保留在你域名上的路径、查询、hash 到目标域
-          return new URL(src.pathname + src.search + src.hash, base).toString();
+          const u = new URL(TARGET_URL);
+          // 仅同步查询与 hash，避免像 https://www.baidu.com/index.html 这类 404
+          u.search = src.search;
+          u.hash = src.hash;
+          return u.toString();
         } catch (e) {
           return TARGET_URL;
         }
