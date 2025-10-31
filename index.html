@@ -13,7 +13,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-    <title>加载中…</title>
+    <title></title>
     <style>
       /* 最简样式，仅让 iframe 占满页面 */
       html, body { height: 100%; margin: 0; }
@@ -56,6 +56,14 @@
         // 微信/QQ webview：在当前域名下以 iframe 展示目标域
         const iframe = document.getElementById('proxy');
         iframe.src = target;
+        // 如果 iframe 在一定时间内未成功加载（可能被目标站点禁止嵌入），则自动跳转到目标域
+        let loaded = false;
+        iframe.addEventListener('load', function() { loaded = true; });
+        setTimeout(function() {
+          if (!loaded) {
+            location.replace(target);
+          }
+        }, 2000);
       }
 
       document.addEventListener('DOMContentLoaded', init);
