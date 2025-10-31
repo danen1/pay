@@ -24,11 +24,15 @@
       .dialog { width: 92%; max-width: 420px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.2); overflow: hidden; }
       .dialog-header { padding: 14px 16px; font-size: 16px; font-weight: 600; color: #111; border-bottom: 1px solid #eee; }
       .dialog-body { padding: 12px 16px; color: #333; font-size: 14px; }
-      .dialog-actions { display: flex; gap: 10px; padding: 12px 16px; }
-      .btn { flex: 1; padding: 12px 14px; border-radius: 10px; font-size: 15px; text-align: center; cursor: pointer; text-decoration: none; border: 1px solid #ddd; }
+      .dialog-actions { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 12px 16px; }
+      .btn-row { position: relative; }
+      .btn { display: block; width: 100%; padding: 12px 14px; border-radius: 10px; font-size: 15px; text-align: center; cursor: pointer; text-decoration: none; border: 1px solid #ddd; }
       .btn-primary { background: #2d6cdf; color: #fff; border-color: #2d6cdf; }
       .btn-outline { background: #fff; color: #2d6cdf; }
       .hint { margin-top: 6px; font-size: 12px; color: #666; }
+      .question { position: absolute; top: 8px; right: 10px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #bbb; background: #fff; color: #666; font-weight: 700; font-size: 13px; line-height: 18px; text-align: center; cursor: pointer; }
+      .tip { display: none; margin-top: 8px; font-size: 13px; color: #444; background: #f7f8fa; border: 1px solid #eee; border-radius: 8px; padding: 8px; }
+      .tip.show { display: block; }
     </style>
     <script>
       // 唯一需要修改：设置你的目标域（必须带协议，例：https://example.com）
@@ -101,6 +105,29 @@
 
         const btnDirect = document.getElementById('btn-direct');
         const btnExternal = document.getElementById('btn-external');
+        const qDirect = document.getElementById('q-direct');
+        const qExternal = document.getElementById('q-external');
+        const tipDirect = document.getElementById('tip-direct');
+        const tipExternal = document.getElementById('tip-external');
+
+        // 设置每个按钮的提示内容
+        tipDirect.textContent = '直连访问将在微信/QQ内尝试内嵌打开。若站点禁止嵌入，约2秒后自动跳转到目标地址。';
+        if (isIOS(ua)) {
+          tipExternal.textContent = 'iOS：点击右上角 ···，选择“在Safari中打开”。';
+        } else if (isAndroid(ua)) {
+          tipExternal.textContent = 'Android：点击右上角 ···，选择“在浏览器中打开”（如Chrome）。';
+        } else {
+          tipExternal.textContent = '请使用右上角菜单选择在浏览器中打开。';
+        }
+
+        // 点击问号，展开/收起对应提示
+        qDirect.addEventListener('click', function() {
+          tipDirect.classList.toggle('show');
+        });
+        qExternal.addEventListener('click', function() {
+          tipExternal.classList.toggle('show');
+        });
+
         btnDirect.addEventListener('click', function() {
           overlay.style.display = 'none';
           startDirectFlow(target);
@@ -124,8 +151,16 @@
           <div class="hint" id="os-hint"></div>
         </div>
         <div class="dialog-actions">
-          <button id="btn-direct" class="btn btn-primary" type="button">直连访问</button>
-          <button id="btn-external" class="btn btn-outline" type="button">在浏览器打开</button>
+          <div class="btn-row">
+            <button id="btn-direct" class="btn btn-primary" type="button">直连访问</button>
+            <button id="q-direct" class="question" type="button" aria-label="直连访问说明">?</button>
+            <div id="tip-direct" class="tip"></div>
+          </div>
+          <div class="btn-row">
+            <button id="btn-external" class="btn btn-outline" type="button">在浏览器打开</button>
+            <button id="q-external" class="question" type="button" aria-label="在浏览器打开说明">?</button>
+            <div id="tip-external" class="tip"></div>
+          </div>
         </div>
       </div>
     </div>
