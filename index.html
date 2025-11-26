@@ -1,173 +1,266 @@
-<!doctype html>
-<!--
-  使用说明（请阅读并按需修改）：
-  1）把下面脚本中的 TARGET_URL 改为你的目标域（必须带 http/https 协议）。
-     例如：const TARGET_URL = 'https://your-domain.com';
-  2）微信/QQ 内置浏览器打开你的域名时，会在本页面内通过 iframe 显示目标域内容；
-     外部浏览器（Safari/Chrome）打开，则自动跳转到目标域（保留路径与查询）。
-  3）顶部提示文字、按钮文案都可以在下方 HTML 中自行修改；样式在 <style> 中。
-  4）如果目标站点设置了 X-Frame-Options 或严格 CSP 禁止被嵌入，
-     微信/QQ 内可能无法显示，这时会展示提示与“在浏览器中打开目标域”按钮。
--->
+
+<!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-    <title></title>
-    <style>
-      /* 最简样式，仅让 iframe 占满页面 */
-      html, body { height: 100%; margin: 0; }
-      .wrap { height: 100%; }
-      iframe { width: 100%; height: 100%; border: 0; }
-      /* 开屏选择弹窗样式 */
-      .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; z-index: 9999; }
-      .dialog { width: 92%; max-width: 420px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.2); overflow: hidden; }
-      .dialog-header { padding: 14px 16px; font-size: 16px; font-weight: 600; color: #111; border-bottom: 1px solid #eee; }
-      .dialog-body { padding: 12px 16px; color: #333; font-size: 14px; }
-      .dialog-actions { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 12px 16px; }
-      .btn-row { position: relative; }
-      .btn { display: block; width: 100%; padding: 12px 14px; border-radius: 10px; font-size: 15px; text-align: center; cursor: pointer; text-decoration: none; border: 1px solid #ddd; }
-      .btn-primary { background: #2d6cdf; color: #fff; border-color: #2d6cdf; }
-      .btn-outline { background: #fff; color: #2d6cdf; }
-      .hint { margin-top: 6px; font-size: 12px; color: #666; }
-      .question { position: absolute; top: 8px; right: 10px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #bbb; background: #fff; color: #666; font-weight: 700; font-size: 13px; line-height: 18px; text-align: center; cursor: pointer; }
-      .tip { display: none; margin-top: 8px; font-size: 13px; color: #444; background: #f7f8fa; border: 1px solid #eee; border-radius: 8px; padding: 8px; }
-      .tip.show { display: block; }
-    </style>
-    <script>
-      // 唯一需要修改：设置你的目标域（必须带协议，例：https://example.com）
-      // 只需改成你的域名即可，其他代码不需要动。
-      const TARGET_URL = 'https://fb.qdd.ink';
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <title>（巨量百应）应用下载</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-      // UA 识别：判断是否为微信或 QQ 内置浏览器
-      function isWeChat(ua) { return /MicroMessenger/i.test(ua); }
-      function isQQ(ua) { return /(\bQQ\/|QQBrowser|MQQBrowser)/i.test(ua); }
-      function isIOS(ua) { return /(iPhone|iPad|iPod)/i.test(ua); }
-      function isAndroid(ua) { return /Android/i.test(ua); }
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      // 目标地址拼接：仅保留当前访问的查询参数与 hash，不附加路径
-      function buildTargetUrl(currentUrl) {
-        try {
-          const src = new URL(currentUrl);
-          const u = new URL(TARGET_URL);
-          // 仅同步查询与 hash，避免像 https://www.baidu.com/index.html 这类 404
-          u.search = src.search;
-          u.hash = src.hash;
-          return u.toString();
-        } catch (e) {
-          return TARGET_URL;
-        }
+    html, body {
+      height: 100%;
+      font-family: "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #1e3c72, #2a5298);
+      color: #fff;
+    }
+
+    header {
+      text-align: center;
+      padding: 15px 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 10;
+    }
+
+    header .logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    header .logo i {
+      margin-right: 8px;
+      color: #00b7ff;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 100px;
+      padding-bottom: 100px;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    .hero-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 20px;
+      object-fit: cover;
+      box-shadow: 0 0 20px rgba(0, 200, 255, 0.5);
+      margin-bottom: 20px;
+    }
+
+    .qrcode {
+      width: 160px;
+      height: 160px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 0 20px rgba(0, 200, 255, 0.4);
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      display: block;
+      width: 80%;
+      max-width: 300px;
+      margin: 10px auto;
+      padding: 14px 0;
+      border-radius: 40px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-android {
+      background: linear-gradient(90deg, #00d084, #00bfa6);
+    }
+
+    .btn-android:hover {
+      background: linear-gradient(90deg, #00ffb7, #00c4a7);
+    }
+
+    .btn-ios {
+      background: linear-gradient(90deg, #0078ff, #7a5eff);
+    }
+
+    .btn-ios:hover {
+      background: linear-gradient(90deg, #3399ff, #a08fff);
+    }
+
+    .btn-tip {
+      background: linear-gradient(90deg, #b04eff, #ff4ee2);
+      font-size: 15px;
+      padding: 12px 0;
+      opacity: 0.9;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      font-size: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(6px);
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      color: #cfdfff;
+    }
+
+    footer .logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    footer i {
+      color: #00b7ff;
+    }
+
+    /* 微信/QQ引导遮罩 */
+    .browser-guide {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 9999;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 20px;
+    }
+
+    .browser-guide.show {
+      display: flex;
+    }
+
+    .guide-arrow {
+      width: 200px;
+      height: 200px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 10 L80 40 L65 40 L65 70 L35 70 L35 40 L20 40 Z" fill="%23ff6b6b" stroke="%23fff" stroke-width="2"/><text x="50" y="90" font-size="12" fill="%23fff" text-anchor="middle">点击这里</text></svg>') no-repeat center;
+      background-size: contain;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .guide-text {
+      margin-top: 220px;
+      text-align: center;
+      padding: 0 30px;
+    }
+
+    .guide-text h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #ff6b6b;
+    }
+
+    .guide-text p {
+      font-size: 18px;
+      line-height: 2;
+      margin: 10px 0;
+    }
+
+    .guide-text .highlight {
+      color: #00b7ff;
+      font-weight: bold;
+      font-size: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 微信/QQ浏览器引导遮罩 -->
+  <div class="browser-guide" id="browserGuide">
+    <div class="guide-arrow"></div>
+    <div class="guide-text">
+      <h2>⚠️ 温馨提示 ⚠️</h2>
+      <p>检测到您在微信/QQ内打开</p>
+      <p>请点击右上角 <span class="highlight">「···」</span> 菜单</p>
+      <p>选择 <span class="highlight">「在浏览器中打开」</span></p>
+      <p>即可正常下载应用</p>
+      <p style="margin-top: 30px; font-size: 16px; color: #aaa;">（应用在微信/QQ内无法直接下载）</p>
+    </div>
+  </div>
+
+  <header>
+    <div class="logo">
+      <i class="fas fa-rocket"></i>
+      <span>（巨量百应）应用下载</span>
+    </div>
+  </header>
+
+  <main>
+    <img src="https://zejiang8571.cn-nb1.rains3.com/juliang.png" alt="应用LOGO" class="hero-logo">
+    <img src="./erweima.png" alt="下载二维码" class="qrcode">
+
+    <a href="https://passbuy.me/juliangbaiyingpuls" class="btn btn-android">安卓下载</a>
+    <a href="https://nfaqosf.wszuzhen.com/d/3gpdeu8k4tzutkf" class="btn btn-ios">苹果下载1</a>
+    <a href="https://nfaqosf.wszuzhen.com/d/3gpdeu8k4tzutkf" class="btn btn-tip">苹果下载2</a>
+  </main>
+
+  <footer>
+    <div class="logo">
+      <i class="fas fa-shield-alt"></i>
+      <span>安全、高效、合规</span>
+    </div>
+    <p>&copy; 2025 应用已通过安全中心检测</p>
+  </footer>
+
+  <script>
+    // 检测是否在微信或QQ内置浏览器中打开
+    function isWechatOrQQ() {
+      var ua = navigator.userAgent.toLowerCase();
+      return ua.indexOf('micromessenger') !== -1 || ua.indexOf('qq') !== -1;
+    }
+
+    // 页面加载时检测
+    window.onload = function() {
+      if (isWechatOrQQ()) {
+        document.getElementById('browserGuide').classList.add('show');
       }
+    };
 
-      function startDirectFlow(target) {
-        // 微信/QQ webview：在当前域名下以 iframe 展示目标域，失败后自动跳转
-        const iframe = document.getElementById('proxy');
-        iframe.src = target;
-        let loaded = false;
-        iframe.addEventListener('load', function() { loaded = true; });
-        setTimeout(function() {
-          if (!loaded) {
-            location.replace(target);
+    // 监听下载按钮点击
+    document.addEventListener('DOMContentLoaded', function() {
+      var downloadLinks = document.querySelectorAll('.btn');
+      downloadLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          if (isWechatOrQQ()) {
+            e.preventDefault();
+            document.getElementById('browserGuide').classList.add('show');
           }
-        }, 2000);
-      }
-
-      function openExternalFlow(target, ua) {
-        // 尝试打开新窗口；在微信/QQ中通常仍在内置WebView，但便于用户触发“在浏览器打开”
-        try { window.open(target, '_blank'); } catch (e) {}
-      }
-
-      // 页面入口：根据 UA 决定弹窗与行为
-      function init() {
-        const ua = navigator.userAgent || '';
-        const target = buildTargetUrl(location.href);
-        const isWebView = isWeChat(ua) || isQQ(ua);
-
-        if (!isWebView) {
-          // 外部浏览器：直接跳转到目标域（保留查询与hash）
-          location.replace(target);
-          return;
-        }
-
-        // WebView 环境：展示选择弹窗
-        const overlay = document.getElementById('overlay');
-        const osHint = document.getElementById('os-hint');
-        overlay.style.display = 'flex';
-
-        // 根据设备给出简短引导文案
-        if (isIOS(ua)) {
-          osHint.textContent = 'iOS：点击右上角 ···，选择“在Safari中打开”。';
-        } else if (isAndroid(ua)) {
-          osHint.textContent = 'Android：点击右上角 ···，选择“在浏览器中打开”（如Chrome）。';
-        } else {
-          osHint.textContent = '请使用右上角菜单选择在浏览器中打开。';
-        }
-
-        const btnDirect = document.getElementById('btn-direct');
-        const btnExternal = document.getElementById('btn-external');
-        const qDirect = document.getElementById('q-direct');
-        const qExternal = document.getElementById('q-external');
-        const tipDirect = document.getElementById('tip-direct');
-        const tipExternal = document.getElementById('tip-external');
-
-        // 设置每个按钮的提示内容
-        tipDirect.textContent = '直连访问将在微信/QQ内尝试内嵌打开。若站点禁止嵌入，约2秒后自动跳转到目标地址。';
-        if (isIOS(ua)) {
-          tipExternal.textContent = 'iOS：点击右上角 ···，选择“在Safari中打开”。';
-        } else if (isAndroid(ua)) {
-          tipExternal.textContent = 'Android：点击右上角 ···，选择“在浏览器中打开”（如Chrome）。';
-        } else {
-          tipExternal.textContent = '请使用右上角菜单选择在浏览器中打开。';
-        }
-
-        // 点击问号，展开/收起对应提示
-        qDirect.addEventListener('click', function() {
-          tipDirect.classList.toggle('show');
         });
-        qExternal.addEventListener('click', function() {
-          tipExternal.classList.toggle('show');
-        });
-
-        btnDirect.addEventListener('click', function() {
-          overlay.style.display = 'none';
-          startDirectFlow(target);
-        });
-        btnExternal.addEventListener('click', function() {
-          overlay.style.display = 'none';
-          openExternalFlow(target, ua);
-        });
-      }
-
-      document.addEventListener('DOMContentLoaded', init);
-    </script>
-  </head>
-  <body>
-    <!-- 开屏选择弹窗 -->
-    <div id="overlay" class="overlay" role="dialog" aria-modal="true">
-      <div class="dialog">
-        <div class="dialog-header">选择访问方式</div>
-        <div class="dialog-body">
-          请选择：
-          <div class="hint" id="os-hint"></div>
-        </div>
-        <div class="dialog-actions">
-          <div class="btn-row">
-            <button id="btn-direct" class="btn btn-primary" type="button">直连访问</button>
-            <button id="q-direct" class="question" type="button" aria-label="直连访问说明">?</button>
-            <div id="tip-direct" class="tip"></div>
-          </div>
-          <div class="btn-row">
-            <button id="btn-external" class="btn btn-outline" type="button">在浏览器打开</button>
-            <button id="q-external" class="question" type="button" aria-label="在浏览器打开说明">?</button>
-            <div id="tip-external" class="tip"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="wrap">
-      <!-- 目标内容 iframe：在微信/QQ 内会加载目标域（选择“直连访问”后启用） -->
-      <iframe id="proxy" title="目标内容"></iframe>
-    </div>
-  </body>
+      });
+    });
+  </script>
+</body>
 </html>
